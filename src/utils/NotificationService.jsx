@@ -67,49 +67,55 @@ const NotificationService = {
 
       if (Notification.permission === 'granted') {
         try {
-          // Default options
+          // Default options untuk mobile compatibility
           const defaultOptions = {
-            icon: '/favicon.svg',
-            badge: '/favicon.svg',
-            vibrate: [200, 100, 200], // Vibrasi default (boleh dihapus kalau tidak perlu)
-            renotify: true,
+            icon: `${import.meta.env.BASE_URL}favicon.png`,
+            badge: `${import.meta.env.BASE_URL}favicon.png`, // Badge untuk mobile
+            dir: 'ltr', // Direction text
+            lang: 'id-ID', // Bahasa Indonesia
             requireInteraction: false,
             silent: false,
             ...options
           };
 
-          // 🔧 PERBAIKAN: Hapus vibrate jika silent: true
-          if (defaultOptions.silent && 'vibrate' in defaultOptions) {
+          // PERBAIKAN: Jika ada renotify, pastikan ada tag
+          if (defaultOptions.renotify && !defaultOptions.tag) {
+            defaultOptions.tag = `notification-${Date.now()}`;
+          }
+
+          // PERBAIKAN: Hapus vibrate jika silent: true
+          if (defaultOptions.silent && defaultOptions.vibrate) {
             delete defaultOptions.vibrate;
           }
 
-          // Buat notifikasi
-          const notification = new Notification(title, defaultOptions);
-
-          // Event handlers
-          notification.onclick = () => {
-            window.focus();
-            notification.close();
-            if (options.onClick) options.onClick();
-          };
-
-          notification.onclose = () => {
-            if (options.onClose) options.onClose();
-          };
-
-          notification.onerror = (error) => {
-            console.error("Notification error:", error);
-            if (options.onError) options.onError(error);
-          };
-
-          // Auto close after duration
-          if (!options.persistent) {
-            setTimeout(() => {
-              notification.close();
-            }, options.duration || 10000);
+          // PERBAIKAN: Untuk mobile, gunakan Service Worker jika tersedia
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            // Kirim notifikasi via Service Worker untuk better mobile support
+            navigator.serviceWorker.ready.then(registration => {
+              registration.showNotification(title, defaultOptions)
+                .then(() => resolve())
+                .catch(error => {
+                  console.error("Service Worker notification error:", error);
+                  // Fallback ke Notification API biasa
+                  const notification = new Notification(title, defaultOptions);
+                  this.setupNotificationHandlers(notification, options);
+                  resolve(notification);
+                });
+            });
+          } else {
+            // Gunakan Notification API biasa
+            const notification = new Notification(title, defaultOptions);
+            this.setupNotificationHandlers(notification, options);
+            
+            // Auto close jika tidak persistent
+            if (!options.persistent) {
+              setTimeout(() => {
+                notification.close();
+              }, options.duration || 10000);
+            }
+            
+            resolve(notification);
           }
-
-          resolve(notification);
         } catch (error) {
           console.error("Error creating notification:", error);
           reject(error);
@@ -120,6 +126,23 @@ const NotificationService = {
     });
   },
 
+  // Setup notification event handlers
+  setupNotificationHandlers: function(notification, options) {
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+      if (options.onClick) options.onClick();
+    };
+
+    notification.onclose = () => {
+      if (options.onClose) options.onClose();
+    };
+
+    notification.onerror = (error) => {
+      console.error("Notification error:", error);
+      if (options.onError) options.onError(error);
+    };
+  },
 
   // Timer notification dengan update berkala
   startTimerNotification: function (taskId, taskTitle, timeRemaining) {
@@ -128,18 +151,25 @@ const NotificationService = {
 
     // Buat notifikasi awal
     const tag = `timer-${taskId}`;
+    let lastNotificationTime = Date.now();
+    
     const updateNotification = () => {
       const timeString = formatTimeForNotification(timeRemaining);
+      const now = Date.now();
+      
+      // Untuk mobile, jangan update terlalu sering
+      if (now - lastNotificationTime < 5000) return; // Minimal 5 detik antar update
+      
+      lastNotificationTime = now;
 
       this.sendNotification(
         `⏱️ ${taskTitle}`,
         {
           body: `Sisa waktu: ${timeString}`,
-          tag: tag, // Tag yang sama akan update notifikasi yang ada
-          renotify: false, // Jangan bunyi ulang saat update
+          tag: tag,
+          renotify: false, // Jangan bunyi ulang
           persistent: true,
           requireInteraction: false,
-          vibrate: false, // Tidak vibrasi untuk update
           silent: true, // Update tanpa suara
           data: {
             taskId,
@@ -147,11 +177,13 @@ const NotificationService = {
           }
         }
       ).then(notification => {
-        // Store reference
-        this.activeTimerNotifications.set(taskId, {
-          notification,
-          intervalId: null
-        });
+        // Store reference jika notification object dikembalikan
+        if (notification && notification.close) {
+          this.activeTimerNotifications.set(taskId, {
+            notification,
+            intervalId: null
+          });
+        }
       }).catch(error => {
         console.error("Error creating timer notification:", error);
       });
@@ -160,7 +192,7 @@ const NotificationService = {
     // Update notifikasi pertama kali
     updateNotification();
 
-    // Update setiap 30 detik untuk mobile (hemat battery)
+    // Update setiap 30 detik
     const intervalId = setInterval(() => {
       timeRemaining -= 30;
       if (timeRemaining > 0) {
@@ -169,20 +201,19 @@ const NotificationService = {
         this.stopTimerNotification(taskId);
         this.timerComplete(taskTitle);
       }
-    }, 30000); // Update setiap 30 detik
+    }, 30000);
 
     // Store interval ID
-    const timerData = this.activeTimerNotifications.get(taskId);
-    if (timerData) {
-      timerData.intervalId = intervalId;
-    }
+    const timerData = this.activeTimerNotifications.get(taskId) || {};
+    timerData.intervalId = intervalId;
+    this.activeTimerNotifications.set(taskId, timerData);
   },
 
   // Stop timer notification
   stopTimerNotification: function (taskId) {
     const timerData = this.activeTimerNotifications.get(taskId);
     if (timerData) {
-      if (timerData.notification) {
+      if (timerData.notification && timerData.notification.close) {
         timerData.notification.close();
       }
       if (timerData.intervalId) {
@@ -204,7 +235,7 @@ const NotificationService = {
         tag: tag,
         renotify: false,
         silent: true,
-        vibrate: false,
+        requireInteraction: false,
         data: {
           taskId,
           timeRemaining
@@ -220,9 +251,10 @@ const NotificationService = {
       {
         body: `Tugas "${taskTitle}" telah selesai.`,
         requireInteraction: true,
-        vibrate: [500, 200, 500, 200, 500], // Pattern vibrasi kuat
+        vibrate: [500, 200, 500, 200, 500],
         tag: 'timer-complete',
-        renotify: true
+        renotify: true,
+        silent: false // Bunyi untuk timer complete
       }
     );
   },
@@ -232,7 +264,9 @@ const NotificationService = {
       '▶️ Timer Dimulai',
       {
         body: `Timer untuk "${taskTitle}" (${duration} menit) telah dimulai.`,
-        tag: 'timer-started'
+        tag: 'timer-started',
+        vibrate: [200, 100, 200],
+        requireInteraction: false
       }
     );
   },
@@ -243,7 +277,9 @@ const NotificationService = {
       '⏸️ Timer Dijeda',
       {
         body: `"${taskTitle}" dijeda. Sisa waktu: ${timeString}`,
-        tag: 'timer-paused'
+        tag: 'timer-paused',
+        vibrate: [200],
+        requireInteraction: false
       }
     );
   },
@@ -253,7 +289,8 @@ const NotificationService = {
       '✅ Tugas Ditambahkan',
       {
         body: `"${taskTitle}" untuk hari ${day} telah ditambahkan.`,
-        tag: 'task-added'
+        tag: 'task-added',
+        requireInteraction: false
       }
     );
   },
@@ -264,7 +301,8 @@ const NotificationService = {
       {
         body: `Tugas "${taskTitle}" telah selesai. Bagus sekali!`,
         vibrate: [200, 100, 200],
-        tag: 'task-completed'
+        tag: 'task-completed',
+        requireInteraction: false
       }
     );
   },
@@ -275,7 +313,9 @@ const NotificationService = {
       '🔔 Test Notifikasi',
       {
         body: 'Notifikasi berhasil diaktifkan! Anda akan menerima pemberitahuan untuk timer dan tugas.',
-        vibrate: [200, 100, 200]
+        vibrate: [200, 100, 200],
+        tag: 'test-notification', // PERBAIKAN: Tambahkan tag
+        requireInteraction: false
       }
     );
   }

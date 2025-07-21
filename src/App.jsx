@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { TaskProvider } from './contexts/TaskContext';
+import { registerServiceWorker } from './utils/registerServiceWorker';
 
 // Import pages
 import HomePage from './pages/HomePage';
@@ -22,6 +23,11 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState('');
   const [showUsernameModal, setShowUsernameModal] = useState(false);
+  
+  useEffect(() => {
+    // Register Service Worker untuk notifikasi mobile
+    registerServiceWorker();
+  }, []);
   
   // Load username from localStorage
   useEffect(() => {
