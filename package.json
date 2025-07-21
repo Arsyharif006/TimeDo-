@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://github.com/Arsyharif006/TimeDo-",
+  "homepage": "https://arsyharif006.github.io/TimeDo-/",
  "scripts": {
   "dev": "vite",
   "build": "vite build",
