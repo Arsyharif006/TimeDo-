@@ -327,7 +327,7 @@ const SettingsPage = ({ username, setUsername }) => {
                         Tentang Pengembang
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Dibuat dengan <FaHeart className="inline text-red-500 mx-1" size={12} /> di Indonesia
+                        Dibuat Oleh Muhammad Arya Ramadhan
                       </p>
                     </div>
                   </div>
@@ -342,11 +342,11 @@ const SettingsPage = ({ username, setUsername }) => {
                   <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
                     <div className="flex items-center space-x-3 mb-3">
                       <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                        YD
+                        AR
                       </div>
                       <div>
                         <h4 className="font-semibold text-gray-800 dark:text-white">
-                          Your Developer
+                        Arsyharif006
                         </h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           Full Stack Developer
@@ -355,29 +355,22 @@ const SettingsPage = ({ username, setUsername }) => {
                     </div>
                     
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      Passionate tentang membuat aplikasi yang membantu meningkatkan produktivitas. 
-                      To-Do List Harian ini dibuat untuk membantu Anda mengelola waktu dengan lebih baik.
+                      Passionate membuat aplikasi yang membantu meningkatkan produktivitas. 
+                      To-Do List Harian ini dibuat untuk membantu mengelola waktu dengan lebih baik.
                     </p>
                     
                     <div className="flex space-x-3">
                       <a 
-                        href="https://github.com/yourusername" 
+                        href="https://github.com/Arsyharif006" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
                         <FaGithub size={18} />
                       </a>
+                    
                       <a 
-                        href="https://linkedin.com/in/yourusername" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                      >
-                        <FaLinkedin size={18} />
-                      </a>
-                      <a 
-                        href="https://instagram.com/yourusername" 
+                        href="https://instagram.com/yaseo.n" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -385,7 +378,7 @@ const SettingsPage = ({ username, setUsername }) => {
                         <FaInstagram size={18} />
                       </a>
                       <a 
-                        href="mailto:your.email@example.com"
+                        href="mailto:aryaarmdhn006@gmail.com"
                         className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                       >
                         <FaEnvelope size={18} />
@@ -413,16 +406,7 @@ const SettingsPage = ({ username, setUsername }) => {
                     </div>
                   </div>
                   
-                  <div className="text-center">
-                    <a 
-                      href="https://buymeacoffee.com/yourusername" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg font-medium transition-colors"
-                    >
-                      <FaCoffee /> Buy me a coffee
-                    </a>
-                  </div>
+            
                 </div>
               )}
             </div>
@@ -431,8 +415,8 @@ const SettingsPage = ({ username, setUsername }) => {
           {/* App Version */}
           <AnimationWrapper animation="fade-up" delay={300}>
             <div className="text-center text-xs text-gray-500 dark:text-gray-400 mt-4">
-              <p>To-Do List Harian v1.0.0</p>
-              <p className="mt-1">© 2024 All rights reserved</p>
+              <p>To-Do List Harian v3.5.0</p>
+              <p className="mt-1">© 2025 All rights reserved</p>
             </div>
           </AnimationWrapper>
         </div>

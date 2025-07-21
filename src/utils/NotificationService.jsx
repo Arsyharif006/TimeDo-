@@ -299,7 +299,7 @@ const NotificationService = {
     return this.sendNotification(
       '🎉 Tugas Selesai!',
       {
-        body: `Tugas "${taskTitle}" telah selesai. Bagus sekali!`,
+        body: `Tugas "${taskTitle}" telah selesai. Selamat!`,
         vibrate: [200, 100, 200],
         tag: 'task-completed',
         requireInteraction: false

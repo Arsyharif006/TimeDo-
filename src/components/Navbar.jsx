@@ -8,7 +8,7 @@ const Navbar = ({ username }) => {
     <nav className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-4 shadow-md">
       <div className="max-w-md mx-auto flex justify-between items-center">
         <Link to="/" className="font-bold text-lg tracking-wide flex items-center">
-          <span className="mr-2 text-white">To-Do List Harian</span>
+          <span className="mr-2 text-white">TimeDo</span>
         </Link>
         
         <div className="flex items-center">
